@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hey My Fathuuu 💗</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: white;
+        }
+
+        /* 3D Particle Background */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* Main Container */
+        .app-container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Welcome Screen with 3D Card */
+        .welcome-screen {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+
+        .welcome-card {
+            background: linear-gradient(135deg, rgba(255, 105, 180, 0.2), rgba(138, 43, 226, 0.2));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 60px;
+            text-align: center;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            box-shadow: 0 20px 60px rgba(255, 105, 180, 0.3);
+        }
+
+        .welcome-card:hover {
+            transform: rotateY(5deg) rotateX(5deg);
+        }
+
+        .hologram-text {
+            font-size: 4em;
+            background: linear-gradient(45deg, #ff6ec7, #7873f5, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s infinite;
+            text-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+        }
+
+        @keyframes shimmer {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(45deg); }
+        }
+
+        .voice-input-section {
+            margin: 40px 0;
+        }
+
+        .modern-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 105, 180, 0.5);
+            border-radius: 50px;
+            padding: 20px 40px;
+            font-size: 1.3em;
+            color: white;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .modern-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #ff6ec7;
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+        }
+
+        .modern-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .futuristic-button {
+            position: relative;
+            background: linear-gradient(45deg, #ff6ec7, #7873f5);
+            border: none;
+            border-radius: 50px;
+            padding: 20px 60px;
+            font-size: 1.2em;
+            color: white;
+            cursor: pointer;
+            margin: 20px 10px;
+            overflow: hidden;
+            transition: all 0.3s;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .futuristic-button:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .futuristic-button:hover:before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .futuristic-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 40px rgba(255, 105, 180, 0.6);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: none;
+            padding: 40px 0;
+        }
+
+        .main-content.active {
+            display: block;
+            animation: fadeInUp 1s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 105, 180, 0.3);
+            border-radius: 20px;
+            padding: 15px 30px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tab-button:hover, .tab-button.active {
+            background: linear-gradient(45deg, #ff6ec7, #7873f5);
+            border-color: transparent;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.4);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 40px;
+            margin: 30px 0;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Voice Recording Section */
+        .voice-recorder {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .record-button {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6ec7, #ff0844);
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            transition: all 0.3s;
+            font-size: 3em;
+            box-shadow: 0 10px 40px rgba(255, 6, 68, 0.5);
+        }
+
+        .record-button:hover {
+            transform: scale(1.1);
+        }
+
+        .record-button.recording {
+            animation: pulse-record 1.5s infinite;
+            background: linear-gradient(45deg, #ff0844, #ff6ec7);
+        }
+
+        @keyframes pulse-record {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(255, 6, 68, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 30px rgba(255, 6, 68, 0);
+            }
+        }
+
+        .audio-visualizer {
+            width: 100%;
+            height: 100px;
+            margin: 20px 0;
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Memory Timeline */
+        /* ===== TIMELINE ===== */
+        .timeline {
+            position: relative;
+            padding: 40px 0;
+            z-index: 1;
+        }
+
+        /* Static line */
+        /* FULL FLOWING ANIMATED LINE */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            transform: translateX(-50%);
+            border-radius: 10px;
+            z-index: 1;
+
+            background: linear-gradient(
+                to bottom,
+                #ff6ec7,
+                #7873f5,
+                #4facfe,
+                #ff6ec7
+            );
+
+            background-size: 100% 300%;
+            animation: flowLine 2.5s linear infinite;
+        }
+
+        /* Continuous flowing effect */
+        @keyframes flowLine {
+            from {
+                background-position: 0% 0%;
+            }
+            to {
+                background-position: 0% 300%;
+            }
+        } 
+
+        /* Moving glow ball */
+        .timeline-glow-ball {
+            position: absolute;
+            left: 50%;
+            width: 18px;
+            height: 18px;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                #ffffff,
+                #ff6ec7,
+                #7873f5
+            );
+            box-shadow:
+                0 0 15px #ff6ec7,
+                0 0 30px #7873f5,
+                0 0 50px #4facfe;
+
+            z-index: 3;
+            animation: moveBall 2.5s linear infinite;
+        }
+
+        /* Ball travels full line */
+        @keyframes moveBall {
+            from { top: -20px; }
+            to   { top: calc(100% - 20px); }
+        }
+        
+        /* Container for moving balls */
+.timeline-balls {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* Each moving ball */
+    .timeline-ball {
+        position: absolute;
+        left: 50%;
+        width: 14px;
+        height: 14px;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        background: radial-gradient(circle,
+            #ffffff,
+            #ff6ec7,
+            #7873f5
+        );
+        box-shadow:
+            0 0 10px #ff6ec7,
+            0 0 20px #7873f5,
+            0 0 35px #4facfe;
+
+        animation: moveBalls 4s linear infinite;
+    }
+
+    /* Move from top to bottom */
+    @keyframes moveBalls {
+        from { top: -20px; }
+        to   { top: 100%; }
+    }
+
+
+        .timeline-item {
+            position: relative;
+            margin: 50px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .timeline-item:nth-child(odd) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            width: 45%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .timeline-content:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 40px rgba(255, 105, 180, 0.3);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, #ff6ec7, #7873f5);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            border: 5px solid #0a0a0a;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
+            z-index: 2;
+        }
+
+        .timeline-date {
+            font-size: 0.9em;
+            color: #ff6ec7;
+            margin-bottom: 10px;
+        }
+
+        .timeline-title {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        /* AR Photo Frame */
+        .ar-photo-section {
+            text-align: center;
+        }
+
+        .photo-upload-area {
+            border: 3px dashed rgba(255, 105, 180, 0.5);
+            border-radius: 20px;
+            padding: 60px;
+            margin: 30px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .photo-upload-area:hover {
+            border-color: #ff6ec7;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .photo-canvas-container {
+            position: relative;
+            display: inline-block;
+            margin: 30px 0;
+        }
+
+        #photoCanvas {
+            max-width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(255, 105, 180, 0.4);
+        }
+
+        .ar-sticker {
+            position: absolute;
+            cursor: move;
+            transition: transform 0.2s;
+            font-size: 50px;
+            user-select: none;
+        }
+
+        .ar-sticker:hover {
+            transform: scale(1.2);
+        }
+
+        .sticker-palette {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .sticker-item {
+            font-size: 40px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .sticker-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.3);
+        }
+
+        .gallery-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+    margin-top: 40px;
+            }
+         .photo-grid {
+
+            display: flex;
+            flex-direction: row;
+            gap: 16px;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: 10px 5px;
+            scroll-behavior: smooth;
+        }
+
+
+        .photo-frame {
+            position: relative;
+            display: inline-block;
+            border-radius: 14px;
+            overflow: hidden;
+            flex: 0 0 auto;
+            max-width: 260px;
+        }
+
+        .photo-img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border-radius: 14px;
+        }
+
+
+        .sticker-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .sticker {
+            position: absolute;
+            font-size: 26px;
+            cursor: grab;
+            pointer-events: auto;
+            user-select: none;
+        }
+
+        .default-audio-player audio {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.4);
+        }
+    /* ===== LOVE LETTER ===== */
+
+    .letter-container {
+        text-align: center;
+        margin-top: 30px;
+    }
+
+    .love-letter {
+        font-size: 90px;
+        cursor: pointer;
+        display: inline-block;
+        animation: shakeLetter 1s infinite;
+        transition: transform 0.3s ease;
+    }
+
+    .love-letter:hover {
+        transform: scale(1.15);
+    }
+
+    /* Shaking animation */
+    @keyframes shakeLetter {
+        0%, 100% { transform: rotate(0deg); }
+        20% { transform: rotate(-8deg); }
+        40% { transform: rotate(8deg); }
+        60% { transform: rotate(-6deg); }
+        80% { transform: rotate(6deg); }
+    } 
+
+    /* ===== BIG CINEMATIC LETTER ===== */
+
+.letter-scene {
+    position: relative;
+    width: 100%;
+    min-height: 220px;   /* small layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Big letter (cube size feel) */
+.big-letter {
+    font-size: 200px;   /* BIG letter only */
+}
+
+.big-letter:hover {
+    transform: scale(1.1);
+}
+
+@keyframes shakeBig {
+    0%,100% { transform: rotate(0deg); }
+    20% { transform: rotate(-6deg); }
+    40% { transform: rotate(6deg); }
+    60% { transform: rotate(-4deg); }
+    80% { transform: rotate(4deg); }
+}
+
+/* Promise burst container */
+.promise-burst {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Each promise card */
+.promise-item {
+    position: absolute;
+    width: 220px;
+    padding: 15px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: white;
+    text-align: center;
+    font-size: 1em;
+    box-shadow: 0 10px 30px rgba(255,105,180,0.35);
+
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+    transition: all 1s ease;
+}
+
+/* visible state */
+.promise-item.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+
+    /* Hidden promises */
+    .letter-content {
+        max-width: 600px;
+        margin: 30px auto;
+        padding: 30px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255,255,255,0.2);
+        display: none;
+        animation: openLetter 0.8s ease;
+    }
+
+    /* Opening animation */
+    @keyframes openLetter {
+        from {
+            opacity: 0;
+            transform: scale(0.7) translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .promise-list {
+        list-style: none;
+        line-height: 1.8;
+        font-size: 1.1em;
+        text-align: left;
+    }
+
+
+        /* 3D Rotating Promises - MANUAL CONTROL */ 
+        /* Swipe Promise Card */
+        .promise-card {
+            width: 320px;
+            min-height: 180px;
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255,105,180,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.2em;
+            box-shadow: 0 15px 40px rgba(255,105,180,0.35);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .promise-card.swiping {
+            transform: scale(0.95);
+            opacity: 0.5;
+        }
+        .promises-3d {
+            perspective: 1000px;
+            padding: 40px 0;
+        }
+       
+        /* QR Code Section */
+        .qr-enhanced {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 105, 180, 0.1));
+            border-radius: 30px;
+            margin: 30px 0;
+        }
+
+        #qrcode {
+            display: inline-block;
+            padding: 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(255, 105, 180, 0.5);
+            margin: 20px 0;
+        }
+
+        .download-btn {
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(58, 123, 213, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .timeline:before {
+                left: 20px;
+            }
+            
+            .timeline-item {
+                flex-direction: column !important;
+            }
+            
+            .timeline-content {
+                width: 100%;
+                margin-left: 40px;
+            }
+            
+            .timeline-dot {
+                left: 20px;
+            }
+
+            .hologram-text {
+                font-size: 2.5em;
+            }
+
+            .promise-cube {
+                width: 200px;
+                height: 200px;
+            }
+
+            .cube-face {
+                width: 200px;
+                height: 200px;
+            }
+
+            .cube-face.front,
+            .cube-face.back { transform: translateZ(100px); }
+            .cube-face.right { transform: rotateY(90deg) translateZ(100px); }
+            .cube-face.left { transform: rotateY(-90deg) translateZ(100px); }
+            .cube-face.top { transform: rotateX(90deg) translateZ(100px); }
+            .cube-face.bottom { transform: rotateX(-90deg) translateZ(100px); }
+        }
+
+        .section-title {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(45deg, #ff6ec7, #7873f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Background -->
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="app-container">
+        <!-- Welcome Screen -->
+        <div class="welcome-screen" id="welcomeScreen">
+            <div class="welcome-card">
+                <div class="hologram-text">💗</div>
+                <h1 class="hologram-text" style="font-size: 2.5em;">My Dear Zawjaa🍀</h1>
+                <p style="font-size: 1.3em; margin: 30px 0; color: rgba(249, 243, 243, 0.8);">
+                    An Innovative Love Experience
+                </p>
+
+                <button class="futuristic-button" onclick="startExperience()">
+                    <span style="position: relative; z-index: 1;">🚀 Begin Journey</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" id="mainContent">
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-button active" onclick="switchTab('promises')">
+                    <span>💖</span> Promises
+                </button>
+                <button class="tab-button" onclick="switchTab('voice')">
+                    <span>🎤</span> Voice Message
+                </button>
+                <button class="tab-button" onclick="switchTab('timeline')">
+                    <span>📅</span> Our Timeline
+                </button>
+                
+                <button class="tab-button" onclick="switchTab('qr')">
+                    <span>📱</span> Save Forever
+                </button>
+            </div>
+
+            <!-- Tab 1: 3D Rotating Promises with Manual Control -->
+            <div class="tab-content active" id="promisesTab">
+                <h2 class="section-title">My Promises to You Ennavalayy</h2>
+            <div class="letter-scene">
+
+    <!-- BIG LETTER -->
+    <div class="big-letter" id="bigLetter" onclick="openLetterBurst()">
+        💌
+    </div>
+
+    <!-- Promise burst container -->
+    <div class="promise-burst" id="promiseBurst"></div>
+
+</div>
+
+
+            </div>
+
+            <!-- Tab 2: Voice Message Recorder -->
+            <div class="tab-content" id="voiceTab">
+                <h2 class="section-title">A Special Message for Special Person</h2>
+                <div class="voice-recorder">
+                    <p style="font-size: 1.2em; margin-bottom: 20px;">
+                        Listen to my heart content<span id="voiceName" style="color: #ff6ec7;"></span>
+                    </p>
+            <div class="record-button" id="recordBtn" onclick="togglePlayback()">🎧</div>
+               <p id="recordStatus">Tap to play my special voice message</p>
+
+                <audio id="fixedAudio" src="My message.mp3"></audio>
+                </div>
+            </div>
+
+            
+            <!-- Tab 3: Memory Timeline -->
+            <div class="tab-content" id="timelineTab">
+                <h2 class="section-title">Our Love Story Timeline</h2>
+                <div class="timeline">
+                    <div class="timeline-balls"></div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">📅 The Beginning</div>
+                            <div class="timeline-title">Our Magic life</div>
+                            <p>The day our paths crossed and magic happened..."19/10/24"</p>
+                        </div>
+                        <div class="timeline-dot"></div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">💕 First Date</div>
+                            <div class="timeline-title">Tragic Moment</div>
+                            <p>Our first date that was very special and unforgettable..."Park Moment"</p>
+                        </div>
+                        <div class="timeline-dot"></div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">💗 Special Day</div>
+                            <div class="timeline-title">Said "I Love You"</div>
+                            <p>The moment everything changed forever...</p>
+                        </div>
+                        <div class="timeline-dot"></div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">🍀 Zawjaa</div>
+                            <div class="timeline-title">My World</div>
+                            <p>My heart belongs to you always and forever...</p>
+                        </div>
+                        <div class="timeline-dot"></div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">♾️ Forever</div>
+                            <div class="timeline-title">In sha Allah</div>
+                            <p>Fid dunya wal Akhirah😻</p>
+                        </div>
+                        <div class="timeline-dot"></div>
+                    </div>
+                </div>
+                </div>
+
+            <div class="tab-content" id="photoTab">
+                <h2 class="section-title">Our Times Together</h2>
+
+                <div class="photo-grid">
+                    <div class="photo-frame">
+                        <img src="pic 1.jpeg" class="photo-img">
+                        <div class="sticker-layer"></div>
+                    </div>
+
+                    <div class="photo-frame">
+                        <img src="pic 2.jpeg" class="photo-img">
+                        <div class="sticker-layer"></div>
+                    </div>
+
+                    <div class="photo-frame">
+                        <img src="pic 3.jpeg" class="photo-img">
+                        <div class="sticker-layer"></div>
+                    </div>  
+
+                    <div class="photo-frame">
+                        <img src="pic 4.jpeg" class="photo-img">
+                        <div class="sticker-layer"></div>
+                    </div>
+                </div>
+
+                <div class="sticker-palette">
+                    <div class="sticker-item" onclick="addSticker('💕')">💕</div>
+                    <div class="sticker-item" onclick="addSticker('💖')">💖</div>
+                    <div class="sticker-item" onclick="addSticker('❤️')">❤️</div>
+                    <div class="sticker-item" onclick="addSticker('🌹')">🌹</div>
+                    <div class="sticker-item" onclick="addSticker('✨')">✨</div>
+                </div>
+            </div>
+
+
+            <!-- Tab 5: QR Code with Enhanced Design -->
+           <div class="tab-content" id="qrTab">
+            <h2 class="section-title">Save This Promise Forever</h2>
+
+        <div class="qr-enhanced">
+            <p style="font-size: 1.3em; margin-bottom: 30px;">
+                The QR contains all our promises, timeline, and special messages!
+            </p>
+
+            <img src="default-qr.png" id="staticQR" style="
+                width: 260px;
+                border-radius: 20px;
+                background: white;
+                padding: 16px;
+                box-shadow: 0 20px 60px rgba(255,105,180,0.5);
+            ">
+
+            <br><br>
+
+            <a href="default-qr.png" download="promise_qr.png">
+                <button class="download-btn">Download QR</button>
+            </a>
+        </div>
+    </div>
+
+
+    <script>
+    
+        // Particle Background
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 100;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2 + 1;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(255, 105, 180, ${Math.random() * 0.5 + 0.2})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        } 
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            }); 
+
+            // Draw connections
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 100) {
+                        ctx.strokeStyle = `rgba(255, 105, 180, ${0.2 * (1 - distance / 100)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(animateParticles);
+        }
+
+        animateParticles();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        const fixedAudio = document.getElementById('fixedAudio');
+        let isPlaying = false;
+
+        function togglePlayback() {
+            if (!isPlaying) {
+                fixedAudio.play();
+                document.getElementById('recordBtn').classList.add('recording');
+                document.getElementById('recordStatus').textContent = 'Playing... Tap to pause';
+                isPlaying = true;
+            } else {
+                fixedAudio.pause();
+                document.getElementById('recordBtn').classList.remove('recording');
+                document.getElementById('recordStatus').textContent = 'Tap to play my special voice message';
+                isPlaying = false;
+            }
+        }
+
+        fixedAudio.onended = () => {
+            document.getElementById('recordBtn').classList.remove('recording');
+            document.getElementById('recordStatus').textContent = 'Tap to play again';
+            isPlaying = false;
+        };
+
+
+        // Start Experience
+        function startExperience() {
+
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('mainContent').classList.add('active');
+
+        
+        } 
+        function openLetterBurst() {
+
+    const letter = document.getElementById("bigLetter");
+    const burst = document.getElementById("promiseBurst");
+
+    letter.style.animation = "none";
+
+    const promises = [
+        "💗 My rarest gem — I’ll never leave you",
+        "🌟I promise na una alone ahh feel panna vida matta i am your guiding star",
+        "🌹Nalla happy ahh neraya enjoy panalam namma every moment ahh um",
+        "👻 I promise to grow old with you",
+        "🪄Neraya na hurt panita inimay una feel panna vidama bathirama pathupa hold you close",
+         "😽Enoda kannamaaa epovumay happy ahh irukanum life long indha azhagu smileoda",
+    ];
+
+    const centerX = 50;
+    const centerY = 50;
+    const radius = 32;
+
+    promises.forEach((text, i) => {
+
+        const angle = (i / promises.length) * (Math.PI * 2);
+
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+
+        const item = document.createElement("div");
+        item.className = "promise-item";
+        item.textContent = text;
+
+        item.style.left = centerX + "%";
+        item.style.top = centerY + "%";
+
+        burst.appendChild(item);
+
+        setTimeout(() => {
+            item.style.left = x + "%";
+            item.style.top = y + "%";
+            item.classList.add("show");
+        }, 100);
+    });
+
+    letter.style.transform = "scale(0)";
+    letter.style.opacity = "0";
+}
+
+        /* ---------- Swipe Promise Card ---------- */
+
+        const promises = [
+        "💗My Rarest gem in this worst world i never leave you",
+        "🌟 I promise na una alone ahh feel panna vida matta i am your guiding star",
+        "🪄 Neraya na hurt panita inimay una feel panna vidama bathirama pathupa hold you close",
+        "😽Enoda kannamaaa epovumay happy ahh irukanum life long indha azhagu smileoda",
+        "🌹Nalla happy ahh neraya enjoy panalam namma every moment ahh um",
+        "👻 I promise to grow old with you",
+    ];
+
+    let currentPromise = 0;
+
+    const card = document.getElementById("promiseCard");
+    const promiseText = document.getElementById("promiseText");
+
+    let startX = 0;
+    let endX = 0;
+
+    function showPromise(index) {
+        card.classList.add("swiping");
+
+        setTimeout(() => {
+            promiseText.textContent = promises[index];
+            card.classList.remove("swiping");
+        }, 200);
+    }
+
+    function handleSwipe() {
+        if (Math.abs(endX - startX) < 40) return;
+
+        if (endX < startX) {
+            currentPromise = (currentPromise + 1) % promises.length;
+        } else {
+            currentPromise =
+                (currentPromise - 1 + promises.length) % promises.length;
+        }
+
+        showPromise(currentPromise);
+    }
+
+    /* MOBILE */
+    card.addEventListener("touchstart", e => {
+        startX = e.touches[0].clientX;
+    });
+
+    card.addEventListener("touchend", e => {
+        endX = e.changedTouches[0].clientX;
+        handleSwipe();
+    });
+
+    /* DESKTOP */
+    card.addEventListener("mousedown", e => {
+        startX = e.clientX;
+    });
+
+    card.addEventListener("mouseup", e => {
+        endX = e.clientX;
+        handleSwipe();
+    });
+
+
+
+        // Tab Switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.closest('.tab-button').classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // Touch/Drag Cube Rotation
+
+      
+
+        // Voice Recording
+        // Photo Functions
+        function loadPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.getElementById('photoCanvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    const maxWidth = 600;
+                    const scale = maxWidth / img.width;
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * scale;
+
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    document.getElementById('stickerPalette').style.display = 'flex';
+                    document.getElementById('canvasContainer').style.display = 'inline-block';
+                    document.getElementById('photoActions').style.display = 'block';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        } 
+
+        function addSticker(symbol) {
+            const layer = document.getElementById('stickerLayer');
+
+            const sticker = document.createElement('div');
+            sticker.className = 'sticker';
+            sticker.textContent = symbol;
+
+            sticker.style.left = '50%';
+            sticker.style.top = '50%';
+            sticker.style.transform = 'translate(-50%, -50%)';
+
+            enableDrag(sticker);
+
+            layer.appendChild(sticker);
+        }
+
+        function enableDrag(el) {
+            let isDown = false;
+            let offsetX, offsetY;
+
+            el.addEventListener('mousedown', e => {
+                isDown = true;
+                offsetX = e.offsetX;
+                offsetY = e.offsetY;
+                el.style.cursor = 'grabbing';
+            });
+
+            document.addEventListener('mousemove', e => {
+                if (!isDown) return;
+                el.style.left = (e.pageX - offsetX) + 'px';
+                el.style.top = (e.pageY - offsetY) + 'px';
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDown = false;
+                el.style.cursor = 'grab';
+            });
+
+            el.addEventListener('touchstart', e => {
+                isDown = true;
+                const t = e.touches[0];
+                const r = el.getBoundingClientRect();
+                offsetX = t.clientX - r.left;
+                offsetY = t.clientY - r.top;
+            });
+
+            document.addEventListener('touchmove', e => {
+                if (!isDown) return;
+                const t = e.touches[0];
+                el.style.left = (t.clientX - offsetX) + 'px';
+                el.style.top = (t.clientY - offsetY) + 'px';
+            });
+
+            document.addEventListener('touchend', () => isDown = false);
+        } 
+
+        let activeLayer = null;
+
+document.querySelectorAll('.photo-frame').forEach(frame => {
+    frame.addEventListener('click', () => {
+        document.querySelectorAll('.photo-frame')
+            .forEach(f => f.classList.remove('active-frame'));
+
+        frame.classList.add('active-frame');
+        activeLayer = frame.querySelector('.sticker-layer');
+    });
+});
+
+    function addSticker(symbol) {
+        if (!activeLayer) return;
+
+        const sticker = document.createElement('div');
+        sticker.className = 'sticker';
+        sticker.textContent = symbol;
+
+        sticker.style.left = '50%';
+        sticker.style.top = '50%';
+        sticker.style.transform = 'translate(-50%, -50%)';
+
+        enableDrag(sticker);
+
+        activeLayer.appendChild(sticker);
+    }
+
+    function enableDrag(el) {
+        let isDown = false, ox = 0, oy = 0;
+
+        el.addEventListener('mousedown', e => {
+            isDown = true;
+            ox = e.offsetX;
+            oy = e.offsetY;
+            el.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', e => {
+            if (!isDown) return;
+            el.style.left = (e.pageX - ox) + 'px';
+            el.style.top = (e.pageY - oy) + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDown = false;
+            el.style.cursor = 'grab';
+        });
+
+        el.addEventListener('touchstart', e => {
+            isDown = true;
+            const t = e.touches[0];
+            const r = el.getBoundingClientRect();
+            ox = t.clientX - r.left;
+            oy = t.clientY - r.top;
+        });
+
+        document.addEventListener('touchmove', e => {
+            if (!isDown) return;
+            const t = e.touches[0];
+            el.style.left = (t.clientX - ox) + 'px';
+            el.style.top = (t.clientY - oy) + 'px';
+        });
+
+        document.addEventListener('touchend', () => isDown = false);
+    } 
+
+    /* ===== MULTIPLE TIMELINE BALLS ===== */
+
+        const ballsContainer = document.querySelector(".timeline-balls");
+        const BALL_COUNT = 10;
+
+        for (let i = 0; i < BALL_COUNT; i++) {
+            const ball = document.createElement("div");
+            ball.classList.add("timeline-ball");
+
+            // spread balls evenly in animation loop
+            ball.style.animationDelay = `${(i * 0.4)}s`;
+
+            ballsContainer.appendChild(ball);
+        }
+
+        function addSticker(emoji) {
+            const container = document.getElementById('canvasContainer');
+            const sticker = document.createElement('div');
+            sticker.className = 'ar-sticker';
+            sticker.textContent = emoji;
+            sticker.style.left = '50%';
+            sticker.style.top = '50%';
+            
+            let isDragging = false;
+            let offsetX, offsetY;
+
+            sticker.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                offsetX = e.clientX - sticker.offsetLeft;
+                offsetY = e.clientY - sticker.offsetTop;
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    sticker.style.left = (e.clientX - offsetX - container.offsetLeft) + 'px';
+                    sticker.style.top = (e.clientY - offsetY - container.offsetTop) + 'px';
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            document.getElementById('stickersLayer').appendChild(sticker);
+            currentStickers.push(sticker);
+        }
+
+        function downloadPhoto() {
+            const canvas = document.getElementById('photoCanvas');
+            const tempCanvas = document.createElement('canvas');
+            const ctx = tempCanvas.getContext('2d');
+            
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            
+            ctx.drawImage(canvas, 0, 0);
+            
+            // Draw stickers on canvas
+            currentStickers.forEach(sticker => {
+                ctx.font = '50px Arial';
+                ctx.fillText(sticker.textContent, 
+                    parseInt(sticker.style.left), 
+                    parseInt(sticker.style.top));
+            });
+
+            tempCanvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `our_times_${herName}.png`;
+                a.click();
+            });
+        }
+
+        function resetPhoto() {
+            document.getElementById('canvasContainer').style.display = 'none';
+            document.getElementById('stickerPalette').style.display = 'none';
+            document.getElementById('photoActions').style.display = 'none';
+            document.getElementById('stickersLayer').innerHTML = '';
+            currentStickers = [];
+        }
+        // Make timeline items editable
+        document.querySelectorAll('.timeline-content').forEach((item, index) => {
+            item.addEventListener('click', function() {
+                const title = this.querySelector('.timeline-title');
+                const description = this.querySelector('p');
+                
+                const newTitle = prompt('Edit title:', title.textContent);
+                const newDesc = prompt('Edit description:', description.textContent);
+                
+                if (newTitle) title.textContent = newTitle;
+                if (newDesc) description.textContent = newDesc;
+                
+                alert('Timeline updated! 💕');
+            });
+        });
+    </script>
+</body>
+</html>
